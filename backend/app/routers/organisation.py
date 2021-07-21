@@ -1,30 +1,67 @@
-from schemas.organisation import Organisation
-from starlette.responses import JSONResponse
-from psycopg2.errors import UniqueViolation
+from schemas.organisation import Organisation, OrganisationAllOptional
 from fastapi import APIRouter
-from db.organisation import create_one, get_all
-from utils import convert_to_key_value_pair, convert_to_key_value_pair_list
+from db.organisation import create_one, delete_one, get_all, get_one, delete_all, update_one
+from utils import convert_to_key_value_pair, convert_to_key_value_pair_list, error_handle, server_error, not_implemented, not_found
 
 router = APIRouter(
   prefix="/api/organisations",
   tags=["organisation"]
 )
 
+columns = ["org_id", "org_name", "org_location"]
+
 @router.get("/")
+@error_handle
 async def get_organisations(pg_num: int = 1, pg_size: int = 10):
-  try:
-    records = await get_all(pg_num, pg_size)
-    return await convert_to_key_value_pair_list(["org_id", "org_name", "org_location"], records)
-  except Exception as error:
-    print(error)
-    return JSONResponse(status_code=500, content={"message": "Server Error"})
+  records = await get_all(pg_num, pg_size)
+  return await convert_to_key_value_pair_list(columns, records)
+  
 
 @router.post("/", status_code=201)
+@error_handle
 async def post_organisations(organisation: Organisation):
-  try:
-    return await create_one(organisation=organisation)
-  except UniqueViolation as error:
-    print(error.__repr__(), type(error))
-    return JSONResponse(status_code=409, content={"message": "record Uniqueness conflict"})
-  except Exception as error:
-    return JSONResponse(status_code=500, content={"message": "Server Error"})
+  return await create_one(organisation=organisation)
+
+@router.delete("/", status_code=202)
+@error_handle
+async def delete_organisations():
+  return await delete_all()
+
+@router.put("/")
+@error_handle
+async def put_organisations():
+  return not_implemented
+
+@router.patch("/")
+@error_handle
+async def patch_organisations():
+  return not_implemented
+
+@router.get("/{org_id}")
+@error_handle
+async def get_organisation(org_id: int):
+  record = await get_one(org_id)
+  if not record:
+    return not_found
+  return await convert_to_key_value_pair(columns, record)
+
+@router.post("/{org_id}")
+@error_handle
+async def post_organisation(org_id: int):
+  return not_implemented
+
+@router.delete("/{org_id}", status_code=202)
+@error_handle
+async def delete_organisation(org_id: int):
+  return await delete_one(org_id=org_id)
+
+@router.put("/{org_id}")
+@error_handle
+async def put_organisation(org_id: int, organisation: Organisation):
+  record = await update_one(org_id=org_id, organisation=organisation)
+  return await convert_to_key_value_pair(columns, record)
+
+@router.patch("/{org_id}")
+@error_handle
+async def patch_organisation(org_id: int, organisation: OrganisationAllOptional):
+  return not_implemented
