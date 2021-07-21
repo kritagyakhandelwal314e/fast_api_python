@@ -2,7 +2,7 @@ from starlette.responses import JSONResponse
 from psycopg2.errors import UniqueViolation
 import functools
 
-def error_handle(func):
+def handle(func):
   @functools.wraps(func)
   async def wrapper_decorator(*args, **kwargs):
     try:
