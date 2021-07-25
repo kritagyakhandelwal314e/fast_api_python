@@ -44,7 +44,8 @@ CREATE TABLE providers (
   provider_department VARCHAR(64),
   provider_org_id INTEGER REFERENCES organisations(org_id) ON DELETE CASCADE,
   provider_created_on TIMESTAMP NOT NULL,
-  provider_last_modified_on TIMESTAMP
+  provider_last_modified_on TIMESTAMP,
+  provider_search_tokens tsvector NOT NULL
 );
 
 CREATE TABLE provider_phone (

@@ -1,3 +1,4 @@
+from pydantic.typing import NoneType
 from starlette.responses import JSONResponse
 from psycopg2.errors import UniqueViolation, StringDataRightTruncation
 import functools
@@ -37,3 +38,14 @@ not_implemented =  JSONResponse(status_code=501, content={"message": "Method not
 server_error = JSONResponse(status_code=500, content={"message": "Server Error"})
 not_found = JSONResponse(status_code=404, content={"message": "Not Found"})
 
+def nested_values(d):
+  for v in d.values():
+    if isinstance(v, dict):
+      yield from nested_values(v)
+    elif isinstance(v, list):
+      for e in v:
+        yield from nested_values(e)
+    elif isinstance(v, NoneType):
+      pass
+    else:
+      yield v

@@ -1,7 +1,7 @@
 from uuid import UUID
 from schemas.provider import Provider
 from fastapi import APIRouter
-from db.provider import get_all, create_one, get_one, delete_one, update_one
+from db.provider import get_all, create_one, get_one, delete_one, get_searched, update_one
 from utils import convert_to_key_value_pair, convert_to_key_value_pair_list, handle, not_implemented, not_found
 
 router = APIRouter(
@@ -61,9 +61,19 @@ async def put_providers():
 async def patch_providers():
   return not_implemented
 
+@router.get("/search")
+@handle
+async def search_provider(pg_num: int = 1, pg_size: int = 10, search_string: str = ''):
+  if not search_string:
+    records = await get_all(pg_num=pg_num, pg_size=pg_size)
+    return await convert_to_key_value_pair_list(columns, records)
+  else:
+    records = await get_searched(pg_num=pg_num, pg_size=pg_size, search_string=search_string)
+    return await convert_to_key_value_pair_list(columns, records)
+
 @router.get("/{provider_id}")
 # @handle
-async def get_organisation(provider_id: UUID):
+async def get_provider(provider_id: UUID):
   record = await get_one(provider_id)
   if not record:
     return not_found
@@ -71,12 +81,12 @@ async def get_organisation(provider_id: UUID):
 
 @router.post("/{provider_id}")
 @handle
-async def post_organisation(provider_id: UUID):
+async def post_provider(provider_id: UUID):
   return not_implemented
 
 @router.delete("/{provider_id}", status_code=202)
 @handle
-async def delete_organisation(provider_id: UUID):
+async def delete_provider(provider_id: UUID):
   return await delete_one(provider_id=provider_id)
 
 @router.put("/{provider_id}")
@@ -87,5 +97,6 @@ async def put_provider(provider_id: UUID, provider: Provider):
 
 @router.patch("/{provider_id}")
 @handle
-async def patch_organisation(provider_id: UUID):
+async def patch_provider(provider_id: UUID):
   return not_implemented
+

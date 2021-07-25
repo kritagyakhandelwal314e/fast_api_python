@@ -1,5 +1,5 @@
 from uuid import UUID
-from utils import convert_to_key_value_pair, convert_to_key_value_pair_list
+from utils import convert_to_key_value_pair, convert_to_key_value_pair_list, nested_values
 from db.connection import conn
 from datetime import datetime
 
@@ -13,7 +13,22 @@ async def get_all(pg_num: int, pg_size: int):
     conn.commit()
     return cur.fetchall()
 
+async def get_searched(pg_num: int, pg_size: int, search_string: str):
+  search_query = ' | '.join(search_string.split(' '))
+  limit = max(0, pg_size)
+  skip = max(0, (pg_num - 1)) * pg_size
+  with conn.cursor() as cur:
+    cur.execute("""
+    SELECT * FROM providers 
+    WHERE provider_search_tokens @@ to_tsquery(%s)
+    LIMIT %s OFFSET %s;
+    """, (search_query, limit, skip))
+    conn.commit()
+    return cur.fetchall()
+
 async def create_one(provider):
+  search_string = ' '.join([str(value) for value in nested_values(provider.dict())])
+  print(search_string)
   with conn.cursor() as cur:
     cur.execute("""
     SELECT org_id FROM organisations 
@@ -50,9 +65,10 @@ async def create_one(provider):
       provider_department,
       provider_org_id,
       provider_created_on,
-      provider_last_modified_on
+      provider_last_modified_on, 
+      provider_search_tokens
     )
-    VALUES (%s, %s, %s, %s, %s, %s)
+    VALUES (%s, %s, %s, %s, %s, %s, %s)
     RETURNING *;
     """, (
       provider.provider_name, 
@@ -60,7 +76,8 @@ async def create_one(provider):
       provider.provider_department, 
       org_id,
       datetime.now(),
-      None
+      None,
+      search_string
     ))
     provider_record = cur.fetchone()
     provider_id = provider_record[0]
@@ -165,6 +182,7 @@ async def create_one(provider):
         spec_id
       ))
     conn.commit()
+    print(provider_record)
     return provider_record
 
 async def get_one(provider_id: UUID):
@@ -174,7 +192,7 @@ async def get_one(provider_id: UUID):
     SELECT * FROM providers
     WHERE provider_id = %s;
     """, (provider_id, ))
-    provider = list(cur.fetchone())
+    provider = list(cur.fetchone())[:-1]
     if not provider:
       return None
     cur.execute("""
@@ -226,6 +244,8 @@ async def delete_one(provider_id: UUID):
 
 async def update_one(provider_id: UUID, provider):
   provider_id = str(provider_id)
+  search_string = ' '.join([str(value) for value in nested_values(provider.dict())])
+  print(search_string)
   with conn.cursor() as cur:
     cur.execute("""
     DELETE FROM providers
@@ -268,9 +288,10 @@ async def update_one(provider_id: UUID, provider):
       provider_department,
       provider_org_id,
       provider_created_on,
-      provider_last_modified_on
+      provider_last_modified_on,
+      provider_search_tokens
     )
-    VALUES ( %s, %s, %s, %s, %s, %s)
+    VALUES ( %s, %s, %s, %s, %s, %s, %s)
     RETURNING *;
     """, (
       provider.provider_name, 
@@ -278,7 +299,8 @@ async def update_one(provider_id: UUID, provider):
       provider.provider_department,
       org_id,
       provider_created_on,
-      datetime.now()
+      datetime.now(),
+      search_string
     ))
     provider_record = cur.fetchone()
     provider_id = provider_record[0]
