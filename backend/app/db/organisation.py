@@ -13,9 +13,9 @@ async def get_all(pg_num: int, pg_size: int):
 async def create_one(organisation):
   with conn.cursor() as cur:
     cur.execute("""
-    INSERT INTO organisations (org_name, org_location)
-    VALUES (%s, %s);
-    """, (organisation.org_name, organisation.org_location))
+    INSERT INTO organisations (org_name, org_location, org_address)
+    VALUES (%s, %s, %s);
+    """, (organisation.org_name, organisation.org_location, organisation.org_address))
     conn.commit()
     return organisation
 
@@ -40,11 +40,14 @@ async def update_one(org_id: int, organisation):
     cur.execute("""
     UPDATE organisations 
     SET org_name = %s, 
-    org_location = %s
+    org_location = %s,
+    org_address = %s
     WHERE org_id = %s
-    RETURNING *;""", (
+    RETURNING *;
+    """, (
       organisation.org_name, 
       organisation.org_location, 
+      organisation.org_address,
       org_id
       )
     )

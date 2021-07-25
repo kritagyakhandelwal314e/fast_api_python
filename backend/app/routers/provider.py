@@ -1,6 +1,7 @@
+from uuid import UUID
 from schemas.provider import Provider
 from fastapi import APIRouter
-from db.provider import get_all, create_one
+from db.provider import get_all, create_one, get_one, delete_one, update_one
 from utils import convert_to_key_value_pair, convert_to_key_value_pair_list, handle, not_implemented, not_found
 
 router = APIRouter(
@@ -14,13 +15,22 @@ columns = [
   "provider_active", 
   "provider_department",
   "provider_org_id",
-  "provider_street_address",
-  "provider_city",
-  "provider_state",
-  "provider_country",
-  "provider_zipcode",
   "provider_created_on",
   "provider_last_modified_on"
+]
+
+columns_extended = [
+  "provider_id", 
+  "provider_name", 
+  "provider_active", 
+  "provider_department",
+  "provider_org_id",
+  "provider_created_on",
+  "provider_last_modified_on",
+  "provider_organisation",
+  "provider_phones",
+  "provider_qualifications",
+  "provider_specialities"
 ]
 
 @router.get("/")
@@ -33,48 +43,49 @@ async def get_providers(pg_num: int = 1, pg_size: int = 10):
 @router.post("/", status_code=201)
 @handle
 async def post_providers(provider: Provider):
-  return await create_one(provider=provider)
+  record =  await create_one(provider=provider)
+  return await convert_to_key_value_pair(columns, record)
 
-# @router.delete("/", status_code=202)
-# @handle
-# async def delete_organisations():
-#   return await delete_all()
+@router.delete("/", status_code=202)
+@handle
+async def delete_providers():
+  return not_implemented
 
-# @router.put("/")
-# @handle
-# async def put_organisations():
-#   return not_implemented
+@router.put("/")
+@handle
+async def put_providers():
+  return not_implemented
 
-# @router.patch("/")
-# @handle
-# async def patch_organisations():
-#   return not_implemented
+@router.patch("/")
+@handle
+async def patch_providers():
+  return not_implemented
 
-# @router.get("/{org_id}")
+@router.get("/{provider_id}")
 # @handle
-# async def get_organisation(org_id: int):
-#   record = await get_one(org_id)
-#   if not record:
-#     return not_found
-#   return await convert_to_key_value_pair(columns, record)
+async def get_organisation(provider_id: UUID):
+  record = await get_one(provider_id)
+  if not record:
+    return not_found
+  return await convert_to_key_value_pair(columns_extended, record)
 
-# @router.post("/{org_id}")
-# @handle
-# async def post_organisation(org_id: int):
-#   return not_implemented
+@router.post("/{provider_id}")
+@handle
+async def post_organisation(provider_id: UUID):
+  return not_implemented
 
-# @router.delete("/{org_id}", status_code=202)
-# @handle
-# async def delete_organisation(org_id: int):
-#   return await delete_one(org_id=org_id)
+@router.delete("/{provider_id}", status_code=202)
+@handle
+async def delete_organisation(provider_id: UUID):
+  return await delete_one(provider_id=provider_id)
 
-# @router.put("/{org_id}")
-# @handle
-# async def put_organisation(org_id: int, organisation: Organisation):
-#   record = await update_one(org_id=org_id, organisation=organisation)
-#   return await convert_to_key_value_pair(columns, record)
+@router.put("/{provider_id}")
+@handle
+async def put_provider(provider_id: UUID, provider: Provider):
+  record = await update_one(provider_id=provider_id, provider=provider)
+  return await convert_to_key_value_pair(columns, record)
 
-# @router.patch("/{org_id}")
-# @handle
-# async def patch_organisation(org_id: int, organisation: OrganisationAllOptional):
-#   return not_implemented
+@router.patch("/{provider_id}")
+@handle
+async def patch_organisation(provider_id: UUID):
+  return not_implemented

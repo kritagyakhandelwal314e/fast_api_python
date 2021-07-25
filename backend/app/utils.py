@@ -1,17 +1,26 @@
 from starlette.responses import JSONResponse
-from psycopg2.errors import UniqueViolation
+from psycopg2.errors import UniqueViolation, StringDataRightTruncation
 import functools
+from db.connection import conn
 
 def handle(func):
   @functools.wraps(func)
   async def wrapper_decorator(*args, **kwargs):
     try:
-      return await func(*args, **kwargs)
+      result = await func(*args, **kwargs)
+      conn.commit()
+      return result
     except UniqueViolation as error:
       print(error.__repr__())
+      conn.rollback()
       return JSONResponse(status_code=409, content={"message": "record Uniqueness conflict"})
+    except StringDataRightTruncation as error:
+      print(error.__repr__())
+      conn.rollback()
+      return JSONResponse(status_code=406, content={"message": "record character count exceeded"})
     except Exception as error:
       print(error.__repr__())
+      conn.rollback()
       return server_error
   return wrapper_decorator
 

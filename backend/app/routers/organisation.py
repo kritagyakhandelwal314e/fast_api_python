@@ -1,4 +1,4 @@
-from schemas.organisation import Organisation, OrganisationAllOptional
+from schemas.organisation import Organisation
 from fastapi import APIRouter
 from db.organisation import create_one, delete_one, get_all, get_one, delete_all, update_one
 from utils import convert_to_key_value_pair, convert_to_key_value_pair_list, handle, not_implemented, not_found
@@ -8,7 +8,7 @@ router = APIRouter(
   tags=["organisation"]
 )
 
-columns = ["org_id", "org_name", "org_location"]
+columns = ["org_id", "org_name", "org_location", "org_address"]
 
 @router.get("/")
 @handle
@@ -63,5 +63,5 @@ async def put_organisation(org_id: int, organisation: Organisation):
 
 @router.patch("/{org_id}")
 @handle
-async def patch_organisation(org_id: int, organisation: OrganisationAllOptional):
+async def patch_organisation(org_id: int):
   return not_implemented

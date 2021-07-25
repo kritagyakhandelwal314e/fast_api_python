@@ -13,13 +13,9 @@ class Provider(BaseModel):
   provider_specialities: List[Speciality] = Field(min_items=1)
   provider_phones: List[Phone] = Field(min_items=1)
   provider_organisation: Organisation
-  provider_street_address: str = Field(min_length=3, max_length=64)
-  provider_city: str = Field(min_length=3, max_length=64)
-  provider_state: str = Field(min_length=3, max_length=64)
-  provider_country: str = Field(min_length=3, max_length=64)
-  provider_zipcode: str = Field(min_length=3, max_length=64, regex=r'[0-9]{6}')
+  provider_department: Optional[str] = Field(max_length=64)
   provider_created_on: Optional[datetime]
-  provider_modified_on: Optional[datetime]
+  provider_last_modified_on: Optional[datetime]
 
 
 
