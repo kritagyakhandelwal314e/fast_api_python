@@ -14,6 +14,8 @@ async def get_all(pg_num: int, pg_size: int):
     return cur.fetchall()
 
 async def get_searched(pg_num: int, pg_size: int, search_string: str):
+  while len(search_string) and search_string[-1] == ' ':
+    search_string = search_string[0:-1]
   search_query = ' | '.join(search_string.split(' '))
   limit = max(0, pg_size)
   skip = max(0, (pg_num - 1)) * pg_size

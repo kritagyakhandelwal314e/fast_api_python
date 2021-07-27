@@ -72,7 +72,7 @@ async def search_provider(pg_num: int = 1, pg_size: int = 10, search_string: str
     return await convert_to_key_value_pair_list(columns, records)
 
 @router.get("/{provider_id}")
-# @handle
+@handle
 async def get_provider(provider_id: UUID):
   record = await get_one(provider_id)
   if not record:
