@@ -238,7 +238,7 @@ async def delete_one(provider_id: UUID):
     cur.execute("""
     DELETE FROM providers
     WHERE provider_id = %s;
-    """, (provider_id, ))
+    """, (str(provider_id), ))
     conn.commit()
   return None
 

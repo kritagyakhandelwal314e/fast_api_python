@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic.typing import NoneType
 from starlette.responses import JSONResponse
 from psycopg2.errors import UniqueViolation, StringDataRightTruncation
@@ -46,6 +47,8 @@ def nested_values(d):
       for e in v:
         yield from nested_values(e)
     elif isinstance(v, NoneType):
+      pass
+    elif isinstance(v, datetime):
       pass
     else:
       yield v

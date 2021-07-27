@@ -85,9 +85,10 @@ async def post_provider(provider_id: UUID):
   return not_implemented
 
 @router.delete("/{provider_id}", status_code=202)
-@handle
+# @handle
 async def delete_provider(provider_id: UUID):
-  return await delete_one(provider_id=provider_id)
+  print(type(provider_id))
+  return await delete_one(provider_id)
 
 @router.put("/{provider_id}")
 @handle
