@@ -8,7 +8,9 @@ async def get_all(pg_num: int, pg_size: int):
   skip = max(0, (pg_num - 1)) * pg_size
   with conn.cursor() as cur:
     cur.execute("""
-    SELECT * FROM providers LIMIT %s OFFSET %s;
+    SELECT * FROM providers 
+    ORDER BY provider_name
+    LIMIT %s OFFSET %s;
     """, (limit, skip))
     conn.commit()
     return cur.fetchall()
@@ -23,6 +25,7 @@ async def get_searched(pg_num: int, pg_size: int, search_string: str):
     cur.execute("""
     SELECT * FROM providers 
     WHERE provider_search_tokens @@ to_tsquery(%s)
+    ORDER BY provider_name
     LIMIT %s OFFSET %s;
     """, (search_query, limit, skip))
     conn.commit()
