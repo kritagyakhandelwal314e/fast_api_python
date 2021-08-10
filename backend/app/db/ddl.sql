@@ -1,3 +1,5 @@
+\c postgres;
+DROP DATABASE healthcaredb;
 CREATE DATABASE healthcaredb;
 \c healthcaredb;
 
@@ -65,5 +67,3 @@ CREATE TABLE provider_qualification (
   qual_id INTEGER REFERENCES qualifications(qual_id) ON DELETE CASCADE,
   PRIMARY KEY (provider_id, qual_id)
 );
-
-CREATE INDEX idx_provider_search_tokens ON providers(provider_search_tokens);
