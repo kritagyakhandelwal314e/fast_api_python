@@ -1,0 +1,28 @@
+version: '3'
+services: 
+  server:
+    build: .
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn main:app --host 0.0.0.0'
+    depends_on:
+      - db
+    ports: 
+      - 8008:8000
+  db:
+    image: postgres:13.1
+    # healthcheck:
+    #   test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+    #   timeout: 45s
+    #   interval: 10s
+    #   retries: 10
+    restart: always
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=password
+      # - POSTGRES_DB=fastapi_traefik
+      - APP_DB_USER=fastapi_traefik
+      - APP_DB_PASS=fastapi_traefik
+      - APP_DB_NAME=healthcaredb
+    volumes:
+      - ./db/init.d:/docker-entrypoint-initdb.d/
+    expose: 
+      - 5432
