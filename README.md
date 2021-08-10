@@ -9,6 +9,7 @@
 
 ## setup
 ##### `git clone https://github.com/kritagyakhandelwal314e/fast_api_python.git`
+##### `cd fast_api_python/`
 ##### `docker-compose down --volumes`
 ##### `docker-compose up --build`
 
